@@ -35,7 +35,7 @@ public class Notification {
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    @JdbcTypeCode(SqlTypes.JSON) // Hướng dẫn Hibernate ép kiểu sang JSON cho Postgres
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "metadata", columnDefinition = "jsonb")
     private String metadata;
 

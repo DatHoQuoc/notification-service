@@ -18,9 +18,10 @@ public class NotificationController {
     @Autowired
     private NotificationService notificationService;
 
-    @PostMapping("/test-ai-result")
-    public String testAiResult(@RequestBody NotificationRequest request) {
+    @PostMapping("/send-manual")
+    public String sendManualNotification(@RequestBody NotificationRequest request) {
         notificationService.createNotification(request);
-        return "Đã gửi yêu cầu tạo thông báo thành công!";
+        return "Thông báo đã được gửi đi";
     }
+
 }

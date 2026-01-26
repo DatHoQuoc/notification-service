@@ -6,6 +6,7 @@ import com.dathq.swd302.notificationservice.model.entity.UserNotificationPrefere
 import com.dathq.swd302.notificationservice.repository.NotificationRepository;
 import com.dathq.swd302.notificationservice.repository.UserNotificationPreferenceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 
@@ -20,6 +21,9 @@ public class NotificationService {
 
     @Autowired
     private UserNotificationPreferenceRepository preferenceRepository;
+
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     public void createNotification(NotificationRequest request) {
         // 1. Kiểm tra Preference của User
@@ -40,13 +44,18 @@ public class NotificationService {
                 .isRead(false)
                 .build();
 
-        notificationRepository.save(notification);
+        Notification savedNotification = notificationRepository.save(notification);
 
         // 3. Logic gửi Email (Nếu shouldSendEmail == true)
         if (shouldSendEmail) {
             System.out.println("Gọi sang Email Service để gửi mail cho user: " + request.getUserId());
         }
 
-        // 4. (Sau này sẽ gọi WebSocket gửi Runtime ở đây)
+        // 4. Thông báo runtime
+        // Đẩy tin nhắn vào topic riêng của từng User: /topic/user/{userId}/notifications
+        String destination = "/topic/user/" + request.getUserId() + "/notifications";
+        messagingTemplate.convertAndSend(destination, savedNotification);
+
+        System.out.println("Đã đẩy thông báo runtime tới: " + destination);
     }
 }
