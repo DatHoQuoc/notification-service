@@ -25,8 +25,6 @@ public class KafkaNotificationConsumer {
     public void listen(String message) {
         System.out.println("Nhận tin nhắn mới từ Kafka: " + message);
 
-        // Giả sử tin nhắn từ AI là một chuỗi Text, ta tạo một Request giả lập để lưu DB
-        // Sau này khi AI gửi JSON, bạn sẽ dùng ObjectMapper để chuyển message thành Object
         NotificationRequest mockRequest = new NotificationRequest();
         mockRequest.setUserId(1L); // Hoặc lấy từ message nếu có
         mockRequest.setTitle("Thông báo từ AI");

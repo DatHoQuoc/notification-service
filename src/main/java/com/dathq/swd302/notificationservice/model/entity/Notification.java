@@ -53,4 +53,7 @@ public class Notification {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "is_deleted", nullable = false)
+    private boolean isDeleted = false;
 }
