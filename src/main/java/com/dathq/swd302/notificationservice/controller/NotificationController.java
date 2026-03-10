@@ -63,9 +63,4 @@ public class NotificationController {
         return ResponseEntity.ok("Đã gửi thông báo thành công!");
     }
 
-    @PostConstruct
-    public void init() {
-        System.out.println("--- DEBUG: SECRET TRONG SERVER LÀ: " + System.getenv("NOTIFICATION_SECRET") + " ---");
-    }
-
 }
