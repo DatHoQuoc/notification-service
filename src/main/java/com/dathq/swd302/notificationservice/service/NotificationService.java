@@ -27,6 +27,9 @@ public class NotificationService {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
+    @Autowired
+    private EmailService emailService;
+
     public void createNotification(NotificationRequest request) {
         // 1. Kiểm tra Preference của User
         boolean shouldSendEmail = preferenceRepository.findByUserIdAndNotificationType(request.getUserId(), request.getNotificationType())
@@ -50,7 +53,18 @@ public class NotificationService {
 
         // 3. Logic gửi Email (Nếu shouldSendEmail == true)
         if (shouldSendEmail) {
-            System.out.println("Gọi sang Email Service để gửi mail cho user: " + request.getUserId());
+            // Lấy email từ request gửi lên
+            String userEmail = request.getRecipientEmail();
+
+            if (userEmail != null && !userEmail.isEmpty()) {
+                String htmlContent = "<h3>" + request.getTitle() + "</h3>" +
+                        "<p>" + request.getContent() + "</p>" +
+                        "<hr><small>Đây là thông báo tự động từ hệ thống.</small>";
+
+                emailService.sendHtmlEmail(userEmail, request.getTitle(), htmlContent);
+            } else {
+                System.out.println("Không thể gửi email vì recipientEmail trống (userId: " + request.getUserId() + ")");
+            }
         }
 
         // 4. Thông báo runtime
