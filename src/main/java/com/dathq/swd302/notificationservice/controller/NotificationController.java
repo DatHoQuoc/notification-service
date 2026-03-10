@@ -3,6 +3,7 @@ package com.dathq.swd302.notificationservice.controller;
 import com.dathq.swd302.notificationservice.model.dto.request.NotificationRequest;
 import com.dathq.swd302.notificationservice.model.entity.Notification;
 import com.dathq.swd302.notificationservice.service.NotificationService;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -45,6 +46,26 @@ public class NotificationController {
     public ResponseEntity<Void> deleteNotification(@PathVariable Long id) {
         notificationService.deleteNotification(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/send-email")
+    public ResponseEntity<String> sendEmail(
+            @RequestHeader("X-Notification-Secret") String secret,
+            @RequestBody NotificationRequest request) {
+
+        String expectedSecret = System.getenv("NOTIFICATION_SECRET");
+
+        if (expectedSecret == null || !expectedSecret.equals(secret)) {
+            return ResponseEntity.status(401).body("Truy cập bị từ chối: Sai Secret!");
+        }
+
+        notificationService.createNotification(request);
+        return ResponseEntity.ok("Đã gửi thông báo thành công!");
+    }
+
+    @PostConstruct
+    public void init() {
+        System.out.println("--- DEBUG: SECRET TRONG SERVER LÀ: " + System.getenv("NOTIFICATION_SECRET") + " ---");
     }
 
 }
