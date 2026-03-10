@@ -1,10 +1,13 @@
 package com.dathq.swd302.notificationservice.controller;
 
+import com.dathq.swd302.notificationservice.model.dto.request.EmailSendRequest;
 import com.dathq.swd302.notificationservice.model.dto.request.NotificationRequest;
 import com.dathq.swd302.notificationservice.model.entity.Notification;
+import com.dathq.swd302.notificationservice.service.EmailService;
 import com.dathq.swd302.notificationservice.service.NotificationService;
-import jakarta.annotation.PostConstruct;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +22,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class NotificationController {
     private final NotificationService notificationService;
+    private final EmailService emailService;
+
+    @Value("${notification.secret}")
+    private String expectedSecret;
 
     @PostMapping("/send-manual")
     public String sendManualNotification(@RequestBody NotificationRequest request) {
@@ -48,18 +55,16 @@ public class NotificationController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/send-email")
+    @PostMapping("/send-mail")
     public ResponseEntity<String> sendEmail(
             @RequestHeader("X-Notification-Secret") String secret,
-            @RequestBody NotificationRequest request) {
-
-        String expectedSecret = System.getenv("NOTIFICATION_SECRET");
+            @Valid @RequestBody EmailSendRequest request) {
 
         if (expectedSecret == null || !expectedSecret.equals(secret)) {
             return ResponseEntity.status(401).body("Truy cập bị từ chối: Sai Secret!");
         }
 
-        notificationService.createNotification(request);
+        emailService.sendEmail(request);
         return ResponseEntity.ok("Đã gửi thông báo thành công!");
     }
 

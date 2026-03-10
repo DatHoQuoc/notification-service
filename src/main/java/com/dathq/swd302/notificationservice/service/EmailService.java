@@ -1,5 +1,6 @@
 package com.dathq.swd302.notificationservice.service;
 
+import com.dathq.swd302.notificationservice.model.dto.request.EmailSendRequest;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,5 +34,9 @@ public class EmailService {
         } catch (MessagingException e) {
             System.err.println("Lỗi gửi mail: " + e.getMessage());
         }
+    }
+
+    public void sendEmail(EmailSendRequest request) {
+        sendHtmlEmail(request.getTo(), request.getSubject(), request.getBody());
     }
 }
