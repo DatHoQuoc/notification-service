@@ -14,4 +14,5 @@ public class NotificationRequest {
     private String metadata;
     private String deepLink;
     private String priority;
+    private String recipientEmail;
 }
