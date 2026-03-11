@@ -2,9 +2,10 @@ package com.dathq.swd302.notificationservice.controller;
 
 import com.dathq.swd302.notificationservice.model.dto.request.NotificationRequest;
 import com.dathq.swd302.notificationservice.model.entity.Notification;
+import com.dathq.swd302.notificationservice.service.EmailService;
 import com.dathq.swd302.notificationservice.service.NotificationService;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +20,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class NotificationController {
     private final NotificationService notificationService;
+
+    private final EmailService emailService;
 
     @PostMapping("/send-manual")
     public String sendManualNotification(@RequestBody NotificationRequest request) {
@@ -48,19 +51,27 @@ public class NotificationController {
         return ResponseEntity.noContent().build();
     }
 
+    @Value("${notification.secret.key:harrypotter}")
+    private String expectedSecret;
+
     @PostMapping("/send-email")
     public ResponseEntity<String> sendEmail(
             @RequestHeader("X-Notification-Secret") String secret,
             @RequestBody NotificationRequest request) {
 
-        String expectedSecret = System.getenv("NOTIFICATION_SECRET");
-
-        if (expectedSecret == null || !expectedSecret.equals(secret)) {
+        if (!expectedSecret.equals(secret)) {
             return ResponseEntity.status(401).body("Truy cập bị từ chối: Sai Secret!");
         }
 
         notificationService.createNotification(request);
-        return ResponseEntity.ok("Đã gửi thông báo thành công!");
+
+        emailService.sendHtmlEmail(
+                request.getRecipientEmail(),
+                request.getTitle(),
+                request.getContent()
+        );
+
+        return ResponseEntity.ok("Đã gửi thông báo và email thành công!");
     }
 
 }

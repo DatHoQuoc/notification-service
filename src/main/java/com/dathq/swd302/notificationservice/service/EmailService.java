@@ -2,6 +2,7 @@ package com.dathq.swd302.notificationservice.service;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -14,24 +15,23 @@ import org.springframework.stereotype.Service;
  */
 
 @Service
+@RequiredArgsConstructor
 public class EmailService {
-    @Autowired
-    private JavaMailSender mailSender;
+    private final JavaMailSender mailSender;
 
-    @Async // Gửi mail bất đồng bộ để không làm chậm luồng chính
-    public void sendHtmlEmail(String to, String subject, String content) {
+    public void sendHtmlEmail(String to, String subject, String htmlContent) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
             helper.setTo(to);
             helper.setSubject(subject);
-            helper.setText(content, true); // true = gửi dưới dạng HTML
+            helper.setText(htmlContent, true); // Tham số 'true' ở đây cho phép gửi HTML
 
             mailSender.send(message);
-            System.out.println("Email đã được gửi thành công tới: " + to);
         } catch (MessagingException e) {
-            System.err.println("Lỗi gửi mail: " + e.getMessage());
+            // Log lỗi hoặc ném ra Exception tùy bạn
+            throw new RuntimeException("Lỗi khi gửi Email: " + e.getMessage());
         }
     }
 }
